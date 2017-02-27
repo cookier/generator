@@ -1,5 +1,5 @@
 /**
- *    Copyright 2006-2016 the original author or authors.
+ *    Copyright 2006-2017 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,21 +15,18 @@
  */
 package org.mybatis.generator.internal.util;
 
-import static org.mybatis.generator.internal.util.StringUtility.isTrue;
+import org.mybatis.generator.api.IntrospectedColumn;
+import org.mybatis.generator.api.IntrospectedTable;
+import org.mybatis.generator.api.dom.OutputUtilities;
+import org.mybatis.generator.api.dom.java.*;
+import org.mybatis.generator.config.Context;
+import org.mybatis.generator.config.PropertyRegistry;
+import org.mybatis.generator.config.TableConfiguration;
 
 import java.util.Locale;
 import java.util.Properties;
 
-import org.mybatis.generator.api.IntrospectedColumn;
-import org.mybatis.generator.api.IntrospectedTable;
-import org.mybatis.generator.api.dom.java.Field;
-import org.mybatis.generator.api.dom.java.FullyQualifiedJavaType;
-import org.mybatis.generator.api.dom.java.JavaVisibility;
-import org.mybatis.generator.api.dom.java.Method;
-import org.mybatis.generator.api.dom.java.Parameter;
-import org.mybatis.generator.config.Context;
-import org.mybatis.generator.config.PropertyRegistry;
-import org.mybatis.generator.config.TableConfiguration;
+import static org.mybatis.generator.internal.util.StringUtility.isTrue;
 
 /**
  * The Class JavaBeansUtil.
@@ -117,7 +114,11 @@ public class JavaBeansUtil {
     public static String getCamelCaseString(String inputString,
             boolean firstCharacterUppercase) {
         StringBuilder sb = new StringBuilder();
-
+        //如果有字段为is_开头的，则需要截取掉这一段
+        int indexOf = inputString.indexOf("is_");
+        if (indexOf > -1) {
+            inputString = inputString.substring(indexOf + 3);
+        }
         boolean nextUpperCase = false;
         for (int i = 0; i < inputString.length(); i++) {
             char c = inputString.charAt(i);
@@ -283,16 +284,18 @@ public class JavaBeansUtil {
             sb.append(" == null ? null : "); //$NON-NLS-1$
             sb.append(property);
             sb.append(".trim();"); //$NON-NLS-1$
-            method.addBodyLine(sb.toString());
         } else {
             sb.append("this."); //$NON-NLS-1$
             sb.append(property);
             sb.append(" = "); //$NON-NLS-1$
             sb.append(property);
             sb.append(';');
-            method.addBodyLine(sb.toString());
         }
-
+        //set方法中，返回当前实例，满足链式编程。
+        OutputUtilities.newLine(sb);
+        OutputUtilities.javaIndent(sb, 2);
+        sb.append("return this;");
+        method.addBodyLine(sb.toString());
         return method;
     }
 
