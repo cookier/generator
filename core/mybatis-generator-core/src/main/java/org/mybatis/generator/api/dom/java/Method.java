@@ -1,5 +1,5 @@
 /**
- *    Copyright 2006-2016 the original author or authors.
+ *    Copyright 2006-2017 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  */
 package org.mybatis.generator.api.dom.java;
 
+import org.mybatis.generator.api.dom.OutputUtilities;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
-
-import org.mybatis.generator.api.dom.OutputUtilities;
 
 /**
  * The Class Method.
@@ -220,7 +220,8 @@ public class Method extends JavaElement {
 
         if (!constructor) {
             if (getReturnType() == null) {
-                sb.append("void"); //$NON-NLS-1$
+                //返回当前类，满足链式调用
+                sb.append(compilationUnit.getType().getShortName()); //$NON-NLS-1$
             } else {
                 sb.append(JavaDomUtils.calculateTypeName(compilationUnit, getReturnType()));
             }
